@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiteFlow - 轻量级脚本调度平台</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts (Outfit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+</head>
+<body class="h-full flex flex-col overflow-hidden">
+
+    <div class="flex h-full w-full overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Logo -->
+                <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                        <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">LiteFlow</span>
+                        <span class="text-[10px] block text-brand-500 font-semibold tracking-widest uppercase -mt-1">Scheduler</span>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="p-4 space-y-1.5">
+                    <button id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg bg-slate-800 text-white shadow-sm transition-all duration-200">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-500"></i>
+                        <span>仪表盘</span>
+                    </button>
+                    <button id="nav-scripts" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                        <i data-lucide="code-2" class="w-4 h-4"></i>
+                        <span>脚本管理</span>
+                    </button>
+                    <button id="nav-history" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                        <i data-lucide="history" class="w-4 h-4"></i>
+                        <span>运行历史</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Footer / Status -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950/40">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-xs font-medium text-slate-400">系统运行正常</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-slate-950">
+            <!-- Top Bar -->
+            <header class="h-16 border-b border-slate-800 flex items-center justify-between px-8 bg-slate-900/50 backdrop-blur shrink-0">
+                <h2 id="page-title" class="text-xl font-bold tracking-tight">控制中心</h2>
+                <div class="flex items-center gap-4">
+                    <button id="btn-create-script" class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 rounded-lg shadow-lg shadow-brand-600/15 transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        新建脚本
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable View Port -->
+            <div class="flex-1 overflow-y-auto p-8" id="view-container">
+                <!-- Views will be dynamically inserted here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit/Create Script Modal (Centered, overlay) -->
+    <div id="modal-script" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <h3 id="modal-title" class="text-lg font-bold">新建脚本</h3>
+                <button onclick="closeScriptModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+                <!-- Info Section -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">脚本名称</label>
+                        <input type="text" id="script-name" placeholder="例如: sync_user_data" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-white transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Cron 调度表达式 (可选)</label>
+                        <input type="text" id="script-cron" placeholder="例如: 0 9 * * * (每天早9点)" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-white transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">启用状态</label>
+                        <div class="flex items-center h-10">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="script-active" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                                <span class="ml-3 text-sm font-medium text-slate-400">激活调度任务</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">描述信息</label>
+                    <input type="text" id="script-desc" placeholder="简要描述脚本的用途..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:border-brand-500 text-white transition-colors">
+                </div>
+
+                <!-- Code and Deps split -->
+                <div class="flex-1 min-h-[350px] grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Python Code Editor -->
+                    <div class="md:col-span-3 flex flex-col border border-slate-800 rounded-lg bg-slate-950 overflow-hidden">
+                        <div class="bg-slate-900 border-b border-slate-800 px-4 py-2 flex items-center justify-between shrink-0">
+                            <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+                                <i data-lucide="terminal" class="w-3.5 h-3.5 text-brand-500"></i> script.py
+                            </span>
+                        </div>
+                        <div id="monaco-container" class="flex-1 w-full min-h-[300px]"></div>
+                    </div>
+                    <!-- Pip Dependencies -->
+                    <div class="flex flex-col border border-slate-800 rounded-lg bg-slate-900 p-4">
+                        <div class="mb-3">
+                            <span class="text-xs font-bold text-slate-200 block">第三方库依赖</span>
+                            <span class="text-[10px] text-slate-400 block mt-0.5">每行输入一个 Pip 包名称，支持指定版本</span>
+                        </div>
+                        <textarea id="script-reqs" placeholder="pandas&#10;requests>=2.28.0&#10;matplotlib" class="flex-1 w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs focus:outline-none focus:border-brand-500 text-slate-100 font-mono resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3 shrink-0">
+                <button onclick="closeScriptModal()" class="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">取消</button>
+                <button id="btn-save-script" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-500 rounded-lg shadow-lg shadow-brand-600/15 transition-all">保存并关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution Log Drawer/Modal -->
+    <div id="modal-log" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
+                <div>
+                    <h3 id="log-script-name" class="text-lg font-bold">脚本执行日志</h3>
+                    <p id="log-meta" class="text-xs text-slate-400 mt-0.5">载入中...</p>
+                </div>
+                <button onclick="closeLogModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <!-- Body Split -->
+            <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+                <!-- Terminal Logs (Left) -->
+                <div class="flex-1 bg-slate-950 p-4 flex flex-col overflow-hidden border-r border-slate-800">
+                    <div class="flex items-center justify-between mb-2 shrink-0">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">控制台输出</span>
+                        <button onclick="scrollLogToBottom()" class="text-[10px] text-slate-400 hover:text-white flex items-center gap-1">
+                            <i data-lucide="arrow-down" class="w-3 h-3"></i> 滚动至底部
+                        </button>
+                    </div>
+                    <pre id="log-terminal" class="flex-1 overflow-auto code-font text-xs p-4 bg-slate-950 text-slate-300 rounded border border-slate-900 whitespace-pre-wrap select-text selection:bg-brand-500/20 leading-relaxed"></pre>
+                </div>
+                <!-- Generated Artifacts (Right) -->
+                <div class="w-full md:w-80 bg-slate-900 p-4 flex flex-col overflow-hidden">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block shrink-0">产生的分析报表与图表</span>
+                    <div id="artifacts-container" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                        <!-- Artifact Cards -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Frontend Core Logic -->
+    <script src="app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Virtual environments
+**/venv/
+**/.venv/
+**/env/
+**/ENV/
+ENV/local/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Databases and local data (SQLite, etc.)
+*.db
+*.sqlite3
+backend/liteflow.db
+
+# Environments / Secrets
+.env
+*.env
+.env.local
+.env.*.local
+
+# IDE and Editor configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
