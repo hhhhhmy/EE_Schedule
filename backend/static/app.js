@@ -1,4 +1,4 @@
-// LiteFlow Frontend Core Engine
+// EE Scheduler Frontend Core Engine
 
 const API_BASE = ""; // Relative path fits perfectly because they share the same origin
 
@@ -13,7 +13,7 @@ const CODE_TEMPLATE = `import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-print(">>> LiteFlow Data Processing Pipeline Starting...")
+print(">>> EE Scheduler Data Processing Pipeline Starting...")
 
 # 1. Simulate data
 data = {
@@ -26,7 +26,7 @@ print("Data frame initialized:\\n", df)
 # 2. Generate visualization
 plt.figure(figsize=(8, 5))
 plt.bar(df['Department'], df['Value'], color='#8b5cf6')
-plt.title("Departmental Distribution - LiteFlow Demo")
+plt.title("Departmental Distribution - EE Scheduler Demo")
 plt.xlabel("Department")
 plt.ylabel("Performance Score")
 plt.tight_layout()
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function initMonaco() {
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' } });
     require(['vs/editor/editor.main'], function () {
-        monaco.editor.defineTheme('liteflow-dark', {
+        monaco.editor.defineTheme('ee-scheduler-dark', {
             base: 'vs-dark',
             inherit: true,
             rules: [
@@ -74,7 +74,7 @@ function initMonaco() {
         monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
             value: CODE_TEMPLATE,
             language: 'python',
-            theme: 'liteflow-dark',
+            theme: 'ee-scheduler-dark',
             automaticLayout: true,
             fontSize: 13,
             lineHeight: 20,

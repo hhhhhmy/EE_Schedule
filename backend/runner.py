@@ -127,9 +127,9 @@ def run_script_in_background(db_session_factory, execution_id: int, script_id: i
     try:
         # 1. Setup/Update environment (code, virtualenv, dependencies)
         # Append progress to log output
-        log_output.append(">>> LiteFlow: Preparing execution environment...")
+        log_output.append(">>> EE Scheduler: Preparing execution environment...")
         setup_environment(script_id, script.code, script.requirements)
-        log_output.append(">>> LiteFlow: Environment ready. Starting script.py...\n")
+        log_output.append(">>> EE Scheduler: Environment ready. Starting script.py...\n")
 
         # 2. Run script subprocess
         cmd = [python_exe, "script.py"]
@@ -155,14 +155,14 @@ def run_script_in_background(db_session_factory, execution_id: int, script_id: i
         exit_code = process.wait()
         if exit_code != 0:
             status = "failed"
-            log_output.append(f"\n>>> LiteFlow: Process exited with non-zero exit code {exit_code}\n")
+            log_output.append(f"\n>>> EE Scheduler: Process exited with non-zero exit code {exit_code}\n")
         else:
-            log_output.append(f"\n>>> LiteFlow: Process finished successfully (exit code 0)\n")
+            log_output.append(f"\n>>> EE Scheduler: Process finished successfully (exit code 0)\n")
 
     except Exception as e:
         status = "failed"
         exit_code = -1
-        log_output.append(f"\n>>> LiteFlow Error during setup/execution:\n{str(e)}\n")
+        log_output.append(f"\n>>> EE Scheduler Error during setup/execution:\n{str(e)}\n")
         logger.exception(f"Execution error for script {script_id}: {str(e)}")
 
     # 3. Detect generated files (artifacts)
@@ -227,7 +227,7 @@ def trigger_script_execution(db: Session, script_id: int) -> models.Execution:
     thread = threading.Thread(
         target=run_script_in_background,
         args=(SessionLocal, execution.id, script_id),
-        name=f"LiteFlow-Executor-Script-{script_id}"
+        name=f"EE-Scheduler-Executor-Script-{script_id}"
     )
     thread.daemon = True
     thread.start()

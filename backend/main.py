@@ -18,7 +18,7 @@ from runner import trigger_script_execution, SCRIPTS_ROOT
 models.Base.metadata.create_all(bind=engine)
 
 # Lifespan context manager equivalent for older/newer FastAPI
-app = FastAPI(title="LiteFlow API", version="1.0.0")
+app = FastAPI(title="EE Scheduler API", version="1.0.0")
 
 # Enable CORS for frontend development
 app.add_middleware(
