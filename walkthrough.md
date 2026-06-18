@@ -92,3 +92,12 @@ uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ### 4. 仪表盘指标自动更新
 运行结束后，首页的脚本总数、今日运行次数、执行成功率（100%）和历史列表均实时刷新：
 ![最新仪表盘指标](C:/Users/hmy82/.gemini/antigravity-ide/brain/09264d2e-a4b7-4b32-bb47-fc223c0273aa/final_dashboard_screenshot_1781811986832.png)
+
+---
+
+## 🔒 运行超时与失败告警功能验证
+
+我们通过执行自动化测试脚本对新接入的安全特性进行了端到端（E2E）功能性验证：
+1. **运行超时自动终止**：配置了 3 秒超时的脚本在运行到第 4 秒时被进程管理器强制中断，输出 `>>> EE Scheduler Error: Script execution timed out...` 警告，将退出状态记录为 `failed` (退出码 `-9`)。
+2. **Webhook 告警投递**：在脚本标记为失败后，后台自动捕获其日志片段，并通过 HTTP POST 将规范的 JSON 数据发送至指定 Webhook URL，接收端成功返回了状态码 `200`。
+
